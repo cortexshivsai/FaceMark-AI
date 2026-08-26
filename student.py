@@ -91,7 +91,7 @@ def get_all_students():
             cursor.close()
             connection.close()
 
-def capture_student_photo(name):
+def capture_student_photo(student_id):
     
     path = str(IMAGE_DIR)
     # Create folder if it doesn't exist
@@ -134,7 +134,7 @@ def capture_student_photo(name):
         # Capture photo
         if key == ord(' '):
 
-            filename = os.path.join(path, f"{name}.jpg")
+            filename = os.path.join(path, f"{student_id}.jpg")
 
             cv2.imwrite(filename, frame)
 
@@ -160,26 +160,72 @@ def capture_student_photo(name):
 
     return False            
 
-def register_student():
+def student_exists(student_id):
 
+    connection = create_connection()
+
+    if connection is None:
+        return False
+
+    try:
+
+        cursor = connection.cursor()
+
+        query = """
+        SELECT id
+        FROM students
+        WHERE student_id = %s
+        LIMIT 1
+        """
+
+        cursor.execute(query, (student_id,))
+
+        result = cursor.fetchone()
+
+        return result is not None
+
+    except Exception as e:
+
+        print("Error checking student:", e)
+
+        return False
+
+    finally:
+
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+            
+def register_student():
     print("\n===== REGISTER NEW STUDENT =====")
 
-    student_id = input("Student ID: ")
-    name = input("Student Name: ")
-    email = input("Email: ")
-    department = input("Department: ")
-    year = int(input("Year: "))
+    student_id = input("Student ID: ").strip()
+    name = input("Student Name: ").strip()
+    email = input("Email: ").strip()
+    department = input("Department: ").strip()
+
+    try:
+        year = int(input("Year: "))
+    except ValueError:
+        print("Invalid year. Please enter a number.")
+        return
+
+     
+    if not student_id or not name:
+        print("Student ID and name are required.")
+        return
+    if student_exists(student_id):
+        print(f"Student ID already exists: {student_id}")
+        return    
 
     print("\nBefore continuing, make sure the student is ready.")
 
-    photo_captured = capture_student_photo(name)
-
+    photo_captured = capture_student_photo(student_id)
     if not photo_captured:
-
         print("Registration cancelled.")
-
         return
 
+    
     # Add student to MySQL
     success = add_student(
         student_id,
@@ -187,7 +233,7 @@ def register_student():
         email,
         department,
         year
-    )
+       )
 
     if success:
 
