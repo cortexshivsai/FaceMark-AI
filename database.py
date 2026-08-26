@@ -114,6 +114,28 @@ def mark_attendance_by_name(name, confidence=None):
         confidence
     )    
 
+def mark_attendance_by_id(student_id, confidence=None):
+    """
+    Find a student by student ID and mark their attendance.
+    """
+
+    student = get_student_by_id(student_id)
+
+    if student is None:
+        print(
+            f"Student ID '{student_id}' not found in database."
+        )
+        return False
+
+    print(
+        f"Recognized: {student['name']} "
+        f"({student['student_id']})"
+    )
+
+    return mark_attendance(
+        student["id"],
+        confidence
+    )
 
 def mark_attendance(student_id, confidence=None):
     connection = create_connection()
