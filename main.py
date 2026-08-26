@@ -7,12 +7,12 @@ import numpy as np
 import face_recognition
 from database import mark_attendance_by_name
 from datetime import datetime
+from config import IMAGE_DIR
 import os
 # Keep track of attendance already processed
 attendance_cache = set()
 
-path = r'C:\Users\shivs\OneDrive\Desktop\Shivsai Python\shivsai\Self_Project1\imgattendance'
-
+path = str(IMAGE_DIR)
 images = []
 classNames = []
 
