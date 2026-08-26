@@ -248,6 +248,14 @@ def register_student():
         print("================================")
 
     else:
+        photo_path = os.path.join(
+        str(IMAGE_DIR),
+        f"{student_id}.jpg"
+        )
+
+        if os.path.exists(photo_path):
+            os.remove(photo_path)
+            print("Saved face photo removed.")
 
         print("Student registration failed.")
 
