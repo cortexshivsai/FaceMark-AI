@@ -1,5 +1,6 @@
 from database import create_connection
 import cv2
+from config import IMAGE_DIR
 import os
 
 def add_student(student_id, name, email=None, department="AIML", year=3):
@@ -91,9 +92,8 @@ def get_all_students():
             connection.close()
 
 def capture_student_photo(name):
-
-    path = r'C:\Users\shivs\OneDrive\Desktop\Shivsai Python\shivsai\Self_Project1\imgattendance'
-
+    
+    path = str(IMAGE_DIR)
     # Create folder if it doesn't exist
     if not os.path.exists(path):
         os.makedirs(path)
