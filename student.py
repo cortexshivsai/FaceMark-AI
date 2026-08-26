@@ -92,11 +92,22 @@ def get_all_students():
             connection.close()
 
 def capture_student_photo(student_id):
-    
+
     path = str(IMAGE_DIR)
+
     # Create folder if it doesn't exist
     if not os.path.exists(path):
         os.makedirs(path)
+
+    # Load OpenCV face detector
+    face_cascade = cv2.CascadeClassifier(
+        cv2.data.haarcascades +
+        "haarcascade_frontalface_default.xml"
+    )
+
+    if face_cascade.empty():
+        print("Error: Could not load face detector.")
+        return False
 
     cap = cv2.VideoCapture(0)
 
@@ -105,7 +116,7 @@ def capture_student_photo(student_id):
         return False
 
     print("\nCamera opened.")
-    print("Position your face in front of the camera.")
+    print("Position one face clearly in front of the camera.")
     print("Press SPACE to capture the photo.")
     print("Press Q to cancel.")
 
@@ -117,9 +128,46 @@ def capture_student_photo(student_id):
             print("Failed to capture frame.")
             break
 
+        # Convert frame to grayscale for face detection
+        gray = cv2.cvtColor(
+            frame,
+            cv2.COLOR_BGR2GRAY
+        )
+
+        faces = face_cascade.detectMultiScale(
+            gray,
+            scaleFactor=1.1,
+            minNeighbors=5,
+            minSize=(80, 80)
+        )
+
+        # Draw face rectangles
+        for (x, y, w, h) in faces:
+
+            cv2.rectangle(
+                frame,
+                (x, y),
+                (x + w, y + h),
+                (0, 255, 0),
+                2
+            )
+
+        # Display face detection status
+        if len(faces) == 0:
+
+            status = "No face detected"
+
+        elif len(faces) == 1:
+
+            status = "Face detected - Ready"
+
+        else:
+
+            status = "Multiple faces detected"
+
         cv2.putText(
             frame,
-            "Press SPACE to Capture | Q to Cancel",
+            status,
             (20, 40),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.7,
@@ -127,18 +175,62 @@ def capture_student_photo(student_id):
             2
         )
 
-        cv2.imshow("Student Registration", frame)
+        cv2.putText(
+            frame,
+            "SPACE = Capture | Q = Cancel",
+            (20, 75),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.6,
+            (255, 255, 255),
+            2
+        )
+
+        cv2.imshow(
+            "Student Registration",
+            frame
+        )
 
         key = cv2.waitKey(1) & 0xFF
 
         # Capture photo
         if key == ord(' '):
 
-            filename = os.path.join(path, f"{student_id}.jpg")
+            # Require exactly one face
+            if len(faces) == 0:
 
-            cv2.imwrite(filename, frame)
+                print("No face detected. Please try again.")
+                continue
 
-            print(f"Photo saved successfully: {filename}")
+            if len(faces) > 1:
+
+                print(
+                    "Multiple faces detected. "
+                    "Only one student should be visible."
+                )
+                continue
+
+            filename = os.path.join(
+                path,
+                f"{student_id}.jpg"
+            )
+
+            saved = cv2.imwrite(
+                filename,
+                frame
+            )
+
+            if not saved:
+
+                print("Error: Could not save photo.")
+
+                cap.release()
+                cv2.destroyAllWindows()
+
+                return False
+
+            print(
+                f"Photo saved successfully: {filename}"
+            )
 
             cap.release()
             cv2.destroyAllWindows()
@@ -158,7 +250,7 @@ def capture_student_photo(student_id):
     cap.release()
     cv2.destroyAllWindows()
 
-    return False            
+    return False     
 
 def student_exists(student_id):
 
