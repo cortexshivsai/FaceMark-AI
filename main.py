@@ -7,15 +7,12 @@ import numpy as np
 import face_recognition
 from database import mark_attendance_by_name
 from datetime import datetime
-from config import IMAGE_DIR
 import os
-
-# Face recognition threshold
-FACE_DISTANCE_THRESHOLD = 0.5
 # Keep track of attendance already processed
 attendance_cache = set()
 
-path = str(IMAGE_DIR)
+path = r'C:\Users\shivs\OneDrive\Desktop\Shivsai Python\shivsai\Self_Project1\imgattendance'
+
 images = []
 classNames = []
 
@@ -106,10 +103,7 @@ if encodeListKnown: # Only proceed if faces were encoded
             match_index = np.argmin(face_distances) # Get index of the smallest distance
 
             # Only proceed if the best match is actually a match (based on compare_faces or a distance threshold)
-            if (
-               matches[match_index]
-               and face_distances[match_index] < FACE_DISTANCE_THRESHOLD
-            ):
+            if matches[match_index] and face_distances[match_index] < 0.5:
               # Get original name from image filename
               name = classNames[match_index]
 
