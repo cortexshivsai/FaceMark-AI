@@ -25,41 +25,6 @@ def create_connection():
 
     return None
 
-def get_student_by_id(student_id):
-
-    connection = create_connection()
-
-    if connection is None:
-        return None
-
-    try:
-
-        cursor = connection.cursor(dictionary=True)
-
-        query = """
-        SELECT *
-        FROM students
-        WHERE student_id = %s
-        LIMIT 1
-        """
-
-        cursor.execute(query, (student_id,))
-
-        student = cursor.fetchone()
-
-        cursor.close()
-        connection.close()
-
-        return student
-
-    except Error as e:
-
-        print("Error fetching student by ID:", e)
-
-        if connection.is_connected():
-            connection.close()
-
-        return None
 
 def get_student_by_name(name):
     connection = create_connection()
@@ -114,28 +79,6 @@ def mark_attendance_by_name(name, confidence=None):
         confidence
     )    
 
-def mark_attendance_by_id(student_id, confidence=None):
-    """
-    Find a student by student ID and mark their attendance.
-    """
-
-    student = get_student_by_id(student_id)
-
-    if student is None:
-        print(
-            f"Student ID '{student_id}' not found in database."
-        )
-        return False
-
-    print(
-        f"Recognized: {student['name']} "
-        f"({student['student_id']})"
-    )
-
-    return mark_attendance(
-        student["id"],
-        confidence
-    )
 
 def mark_attendance(student_id, confidence=None):
     connection = create_connection()
